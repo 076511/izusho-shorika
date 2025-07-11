@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>職員室注文フォーム</title>
+  <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+  <style>
+    body {
+      font-family: sans-serif;
+      padding: 20px;
+    }
+    label, select, input {
+      display: block;
+      margin-bottom: 15px;
+    }
+    button {
+      padding: 10px 20px;
+    }
+  </style>
+</head>
+<body>
+  <h2>注文フォーム</h2>
+  <form id="orderForm">
+    <label>商品名:
+      <select id="item">
+        <option value="コーヒー">コーヒー</option>
+        <option value="お茶">お茶</option>
+        <option value="クッキー">クッキー</option>
+      </select>
+    </label>
+
+    <label>数量:
+      <input type="number" id="quantity" value="1" min="1" max="10">
+    </label>
+
+    <label>職員室:
+      <select id="room">
+        <option value="職員室">職員室</option>
+        <option value="商業センター">商業センター</option>
+        <option value="進路指導室">進路指導室</option>
+        <option value="生徒指導室">生徒指導室</option>
+
+      </select>
+    </label>
+
+    <button type="submit">注文する</button>
+  </form>
+
+  <p id="result"></p>
+
+  <script>
+    document.addEventListener("DOMContentLoaded", function () {
+      liff.init({ liffId: "YOUR_LIFF_ID" })  // ← LIFF ID をあとで置き換える
+        .then(() => {
+          if (!liff.isLoggedIn()) {
+            liff.login();
+          }
+        })
+        .catch(err => {
+          document.getElementById("result").textContent = "LIFFエラー: " + err;
+        });
+
+      document.getElementById("orderForm").addEventListener("submit", async function (e) {
+        e.preventDefault();
+
+        const profile = await liff.getProfile();
+
+        const data = {
+          name: profile.displayName,
+          item: document.getElementById("item").value,
+          quantity: parseInt(document.getElementById("quantity").value),
+          room: document.getElementById("room").value
+        };
+
+        fetch("https://script.google.com/macros/s/あなたのGASのURL/exec", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify(data)
+        })
+        .then(res => res.text())
+        .then(msg => {
+          document.getElementById("result").textContent = "注文完了：" + msg;
+        })
+        .catch(err => {
+          document.getElementById("result").textContent = "送信エラー：" + err;
+        });
+      });
+    });
+  </script>
+</body>
+</html>
